@@ -22,9 +22,10 @@ public:
 		std::string dispatchName, 
 		int dispatchLevel, 
 		std::string dispatchLevelName, 
-		std::vector<Command*> dispatchCommands);
+		std::vector<Command*> dispatchCommands = {});
 
 	virtual void run(int argc, char** argv);
+	virtual void add_subcommand(Command* command);
 
 private:
 	int level;

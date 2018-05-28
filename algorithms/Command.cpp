@@ -174,7 +174,11 @@ void MatrixTestSubCommand::run(int argc, char** argv) {
 
 
 
-CommandDispatcher::CommandDispatcher(string dispatchName, int dispatchLevel, string dispatchLevelName, vector<Command*> dispatchCommands) :
+CommandDispatcher::CommandDispatcher(
+	string dispatchName,
+	int dispatchLevel,
+	string dispatchLevelName,
+	vector<Command*> dispatchCommands) :
 	level(dispatchLevel),
 	levelName(dispatchLevelName) {
 	m_name = dispatchName;
@@ -209,4 +213,12 @@ void CommandDispatcher::run(int argc, char** argv) {
 	}
 
 	commandIt->second->run(argc, argv);
+}
+
+void CommandDispatcher::add_subcommand(Command* command)
+{
+	LOG_DEBUG(
+		cout << "CommandDispatcher::add_subcommand DEBUG: Adding command " << *command << " to " << this->name() << "." << endl;
+	);
+	commands[command->name()] = command;
 }

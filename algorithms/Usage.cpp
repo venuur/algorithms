@@ -80,6 +80,7 @@ ostream& operator<<(ostream& os, const ColumnarText& text) {
 }
 
 
+
 void printUsage(int argc, char** argv) {
 	string programNameArg(argv[0]);
 	fs::path programPath(programNameArg);
