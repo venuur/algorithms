@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -10,6 +11,7 @@ using std::pair;
 using std::vector;
 using std::min;
 using std::max;
+using std::ostream;
 
 template<class State, class Percept>
 class Sensor {
@@ -27,7 +29,7 @@ public:
 template <class Action, class Percept>
 class Agent {
 public:
-	virtual Action operator(const Percept &percept) = 0;
+	virtual Action operator()(const Percept &percept) = 0;
 };
 
 template <class State, class Action, class Percept>
@@ -52,9 +54,30 @@ public:
 
 	typedef pair<int, int> Coordinate;
 	typedef vector<Coordinate> History;
+	struct Percept {
+		Coordinate loc;
+		Coordinate max_coord;
+	};
 	enum class Move {up, down, left, right};
+	class LocalView : public Sensor<Coordinate, Percept> {
+	public:
+		virtual Coordinate interpret_input(const Percept& percept) {
+			return percept.loc;
+		}
+	};
+	class WalkLine : public Rules<Move, Coordinate> {
+	public:
+		WalkLine(Move direction_) : direction(direction_) {}
 
-	GridWorld(Agent<Move, Coordinate> &agent_, Coordinate start, Coordinate max_coord_) :
+		virtual Move match(const Coordinate& not_used) {
+			return direction;
+		}
+
+	private:
+		Move direction;
+	};
+
+	GridWorld(Agent<Move, Percept> &agent_, Coordinate start, Coordinate max_coord_) :
 		max_coord(max_coord_),
 		agent_loc(start), 
 		agent(agent_) {
@@ -63,18 +86,21 @@ public:
 
 	void run(int n_steps = 1) {
 		for (int i = 0; i < n_steps; ++i) {
-			Move move = agent(agent_loc);
+			Move move = agent(Percept{ agent_loc, max_coord });
 			update(move);
 			history.push_back(agent_loc);
 		}
 	}
+
+	friend ostream& operator<<(ostream&, GridWorld&);
 
 private:
 	Coordinate max_coord;
 	Coordinate agent_loc;
 	History history;
 
-	Agent<Move, Coordinate> &agent;
+	Agent<Move, Percept> &agent;
+
 
 	void update(Move move) {
 		switch (move) {
@@ -93,3 +119,22 @@ private:
 		}
 	}
 };
+
+ostream& operator<<(ostream& os, GridWorld &env) {
+	for (int row = env.max_coord.second; row >= 0; --row) {
+		for (int col = 0; col <= env.max_coord.first; ++col) {
+			if (row == env.agent_loc.second && col == env.agent_loc.first) {
+				os << "A";
+			}
+			else {
+				os << ".";
+			}
+		}
+		os << "\n";
+	}
+	os << std::endl;
+
+	return os;
+}
+
+typedef SimpleReflexAgent<GridWorld::Coordinate, GridWorld::Move, GridWorld::Percept> GW_SR_Agent;

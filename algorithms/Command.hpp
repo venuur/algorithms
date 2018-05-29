@@ -72,3 +72,9 @@ public:
 
 	virtual void run(int argc, char** argv);
 };
+
+class GridWorldTestSubCommand : public Command {
+public:
+	GridWorldTestSubCommand();
+	virtual void run(int argc, char** argv);
+};

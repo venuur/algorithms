@@ -4,6 +4,7 @@
 #include "PoissonProcess.hpp"
 #include "Matrix.hpp"
 #include "PrettyPrint.hpp"
+#include "Agent.hpp"
 
 #include <string>
 #include <iostream>
@@ -221,4 +222,56 @@ void CommandDispatcher::add_subcommand(Command* command)
 		cout << "CommandDispatcher::add_subcommand DEBUG: Adding command " << *command << " to " << this->name() << "." << endl;
 	);
 	commands[command->name()] = command;
+}
+
+GridWorldTestSubCommand::GridWorldTestSubCommand()
+{
+	m_name = "test";
+}
+
+void GridWorldTestSubCommand::run(int argc, char ** argv)
+{
+	LOG_DEBUG(
+		cout << "DEBUG: Running GridWorldTestSubCommand" << endl;
+	);
+
+	if (argc != 3) {
+		cout << "ERROR: Wrong number of arguments." << endl;
+		printUsage(argc, argv);
+		return;
+	}
+
+	//stringstream argStream;
+	//string matrixFilename;
+	//argStream << argv[3];
+	//argStream >> matrixFilename;
+	//LOG_DEBUG(
+	//	cout << "DEBUG: argStream " << argStream.str() << endl;
+	//);
+
+	GridWorld::Move directions[] = {
+		GridWorld::Move::up,
+		GridWorld::Move::down,
+		GridWorld::Move::right,
+		GridWorld::Move::left
+	};
+
+	vector<GW_SR_Agent> walkers; 
+	for (GridWorld::Move direction : directions) {
+		walkers.push_back(
+			GW_SR_Agent(
+				new GridWorld::LocalView, 
+				new GridWorld::WalkLine(direction)));
+	}
+
+	for (GW_SR_Agent &agent : walkers) {
+		GridWorld env(agent, GridWorld::Coordinate(2, 2), GridWorld::Coordinate(4, 4));
+		cout << "Iteration " << 0 << "\n";
+		cout << env;
+		for (int i = 0; i < 5; ++i) {
+			env.run();
+			cout << "Iteration " << i << "\n";
+			cout << env;
+		}
+	}
 }
