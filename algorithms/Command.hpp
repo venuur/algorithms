@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <iostream>
 
+void grid_world_test_line_walkers();
+
 class Command {
 public:
 	virtual void run(int argc, char** argv) = 0;

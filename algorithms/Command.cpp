@@ -249,6 +249,14 @@ void GridWorldTestSubCommand::run(int argc, char ** argv)
 	//	cout << "DEBUG: argStream " << argStream.str() << endl;
 	//);
 
+	grid_world_test_line_walkers();
+
+	
+}
+
+void grid_world_test_line_walkers() {
+	cout << "---- Testing line walkers ----\n\n";
+
 	GridWorld::Move directions[] = {
 		GridWorld::Move::up,
 		GridWorld::Move::down,
@@ -256,11 +264,50 @@ void GridWorldTestSubCommand::run(int argc, char ** argv)
 		GridWorld::Move::left
 	};
 
-	vector<GW_SR_Agent> walkers; 
+	vector<GW_SR_Agent> walkers;
 	for (GridWorld::Move direction : directions) {
 		walkers.push_back(
 			GW_SR_Agent(
-				new GridWorld::LocalView, 
+				new GridWorld::LocalView,
+				new GridWorld::WalkLine(direction)));
+	}
+
+	for (GW_SR_Agent &agent : walkers) {
+		GridWorld env(agent, GridWorld::Coordinate(2, 2), GridWorld::Coordinate(4, 4));
+		cout << "Iteration " << 0 << "\n";
+		cout << env;
+		for (int i = 0; i < 5; ++i) {
+			env.run();
+			cout << "Iteration " << i << "\n";
+			cout << env;
+		}
+	}
+}
+
+void grid_world_test_space_invaders() {
+	cout << "---- Testing space invaders ----\n\n"; 
+
+	struct alien_args {
+		bool even_right;
+		int  left_edge;
+		int  right_edge;
+	};
+	alien_args args[] = {
+	{true, 1, 3},
+	{false, 1, 3}
+	};
+	GridWorld::Coordinate starts[] = {
+	{2, 2},
+	{0, 0},
+	{4, 0}
+	};
+
+	//TODO finish creating loops for space invaders.
+	vector<GW_SR_Agent> walkers;
+	for (alien_args arg : args) {
+		walkers.push_back(
+			GW_SR_Agent(
+				new GridWorld::LocalView,
 				new GridWorld::WalkLine(direction)));
 	}
 

@@ -12,6 +12,7 @@ using std::vector;
 using std::min;
 using std::max;
 using std::ostream;
+using std::cerr;
 
 template<class State, class Percept>
 class Sensor {
@@ -69,12 +70,112 @@ public:
 	public:
 		WalkLine(Move direction_) : direction(direction_) {}
 
-		virtual Move match(const Coordinate& not_used) {
+		virtual Move match(const Coordinate &not_used) {
 			return direction;
 		}
 
 	private:
 		Move direction;
+	};
+	class SpaceInvader : public Rules<Move, Coordinate> {
+	public:
+		SpaceInvader(bool even_right_, int left_edge_, int right_edge_) :
+			even_right(even_right_), left_edge(left_edge_), right_edge(right_edge_) {
+			// Check that the bounds (left_edge, right_edge) are valid.
+			if (left_edge > right_edge) {
+				cerr << "Warning: left_edge of space invader boundary must be to the left of the right_edge.\n"
+					<< "         Replacing right_edge with left_edge + 1." << std::endl;
+			}
+		}
+
+		virtual Move match(const Coordinate &loc) {
+			// If out of bounds, move back to bounds.
+			if (loc.first < left_edge) {
+				return Move::right;
+			}
+			else if (loc.first > right_edge) {
+				return Move::left;
+			}
+
+			// If at the edge, the even_right==true means we move right when on an even row and on the left edge,
+			// and we move left when on an odd row and on the right edge. See the following grid as an example:
+			//  > = Move::right, < = Move::left, V = Move::down
+			// even_right==true     even_right==false
+			//   0 1 2 3               0 1 2 3
+			// 0 > > > V             0 V < < <
+			// 1 V < < <             1 > > > V
+			// 2 > > > V             2 V < < <
+			// 3 V < < <             3 > > > V
+			//
+
+			// From prior checks, loc.first \in [left_edge, right_edge].
+			if (even_right) {
+				if (loc.first == left_edge) {
+					if (loc.second % 2 == 0) {
+						return Move::right;
+					}
+					else {
+						return Move::down;
+					}
+				}
+				else if (loc.first == right_edge) {
+					if (loc.second % 2 == 1) {
+						return Move::left;
+					}
+					else {
+						return Move::down;
+					}
+				}
+				// loc.first \in (left_edge, right_edge).
+				else {
+					if (loc.second % 2 == 0) {
+						return Move::right;
+					}
+					else {
+						return Move::left;
+					}
+				}
+			}
+			// even_right == false
+			else {
+				if (loc.first == left_edge) {
+					if (loc.second % 2 == 0) {
+						return Move::down;
+					}
+					else {
+						return Move::right;
+					}
+				}
+				else if (loc.first == right_edge) {
+					if (loc.second % 2 == 1) {
+						return Move::down;
+					}
+					else {
+						return Move::left;
+					}
+				}
+				// loc.first \in (left_edge, right_edge).
+				else {
+					if (loc.second % 2 == 0) {
+						return Move::left;
+					}
+					else {
+						return Move::right;
+					}
+				}
+			}
+
+			// Some input must be malformed if we reached here, so print an error and move upward, as that move is 
+			// unexpected of a space invader.
+			cerr << "ERROR: All rules for space invader passed without reaching a valid move."
+				<< "       Defaulting to moving up to signal error." << std::endl;
+			return Move::up;
+		}
+
+	private:
+		bool even_right;
+		int left_edge;
+		int right_edge;
 	};
 
 	GridWorld(Agent<Move, Percept> &agent_, Coordinate start, Coordinate max_coord_) :
