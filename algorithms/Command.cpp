@@ -229,6 +229,9 @@ GridWorldTestSubCommand::GridWorldTestSubCommand()
 	m_name = "test";
 }
 
+void grid_world_test_line_walkers();
+void grid_world_test_space_invaders();
+
 void GridWorldTestSubCommand::run(int argc, char ** argv)
 {
 	LOG_DEBUG(
@@ -250,7 +253,7 @@ void GridWorldTestSubCommand::run(int argc, char ** argv)
 	//);
 
 	grid_world_test_line_walkers();
-
+	grid_world_test_space_invaders();
 	
 }
 
@@ -308,17 +311,22 @@ void grid_world_test_space_invaders() {
 		walkers.push_back(
 			GW_SR_Agent(
 				new GridWorld::LocalView,
-				new GridWorld::WalkLine(direction)));
+				new GridWorld::SpaceInvader(
+					arg.even_right,
+					arg.left_edge,
+					arg.right_edge)));
 	}
 
 	for (GW_SR_Agent &agent : walkers) {
-		GridWorld env(agent, GridWorld::Coordinate(2, 2), GridWorld::Coordinate(4, 4));
-		cout << "Iteration " << 0 << "\n";
-		cout << env;
-		for (int i = 0; i < 5; ++i) {
-			env.run();
-			cout << "Iteration " << i << "\n";
+		for (GridWorld::Coordinate &start : starts) {
+			GridWorld env(agent, start, GridWorld::Coordinate(4, 4));
+			cout << "Iteration " << 0 << "\n";
 			cout << env;
+			for (int i = 0; i < 10; ++i) {
+				env.run();
+				cout << "Iteration " << i << "\n";
+				cout << env;
+			}
 		}
 	}
 }

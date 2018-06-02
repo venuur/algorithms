@@ -6,6 +6,7 @@
 #include <iostream>
 
 void grid_world_test_line_walkers();
+void grid_world_test_space_invaders();
 
 class Command {
 public:
